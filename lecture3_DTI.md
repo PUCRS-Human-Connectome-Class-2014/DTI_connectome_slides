@@ -36,10 +36,10 @@
 
 1. Preprocess the data
 2. Construct *affinity matrix* for each dataset
-    - $N_{vox} \times N_{vox}$ matrix where each entry corresponds to the similarity of the voxel's timeseries (fMRI), or connectivity pattern (fMRI or dMRI)
+    - $N_{vox} \times N_{vox}$ matrix where each entry corresponds to the similarity of the voxel's time course (fMRI), or connectivity pattern (fMRI or dMRI)
     - Constrain connectivity to just neighboring voxels
 3. Cluster individual data
-    - Several different clustering alogorithms can be used
+    - Several different clustering algorithms can be used
 4. Combine clustering solution across datasets
     - Create affinity matrix for each clustering solution, where similarity is 1 if two voxels are in the same cluster, and 0 otherwise
     - Average affinity matrices across datasets
