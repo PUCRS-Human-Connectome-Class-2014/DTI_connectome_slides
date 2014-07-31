@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="R. Cameron Craddock, PhD" />
+  <meta name="author" content="Research Scientist VI, Nathan S. Kline Institute for Psychiatric Research, New York, NY" />
+  <meta name="author" content="Director of Imaging, Child Mind Institute, New York, NY" />
+  <meta name="date" content="2014-07-30" />
+  <title>Lecture #3: Mapping structural connectivity in the connectome with DTI</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="http://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+  <script src="http://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">Lecture #3: Mapping structural connectivity in the connectome with DTI</h1>
+  <p class="author">
+R. Cameron Craddock, PhD<br/>Research Scientist VI, Nathan S. Kline Institute for Psychiatric Research, New York, NY<br/>Director of Imaging, Child Mind Institute, New York, NY
+  </p>
+  <p class="date">July 30, 2014</p>
+</div>
+<div id="leftover-from-fmri-lecture" class="slide section level1">
+<h1>Leftover from fMRI lecture</h1>
+<ul>
+<li>Constructing <em>brain areas</em> (Regions of Interests, ROIs) using clustering algorithms</li>
+<li>Measuring functional interactions between brain areas</li>
+</ul>
+</div>
+<div id="brain-areas" class="slide section level1">
+<h1>Brain Areas</h1>
+<center><figure>
+<img src="imgs/All_masks.png">
+<figcaption>
+<small>Different atlases for defining connectome nodes. Craddock et al., Nature Methods, 2013</small>
+</figcaption></figure></center>
+
+<ul>
+<li>To construct a <em>connectome graph</em>, you must first choose the areas to use as <em>graph nodes</em></li>
+<li>Voxels are a logical choice, but will result in very large connectomes</li>
+<li>Alternatives are to use brain atlases derived from cytoarchitectonics, cortical landmarks, or from clustering data</li>
+</ul>
+</div>
+<div id="brain-areas-1" class="slide section level1">
+<h1>Brain Areas</h1>
+<center><figure>
+<img src="imgs/figure9.png" width=300>
+<figcaption>
+<small>Different atlases provide different FC results. Craddock et al., Human Brain Mapping, 2011</small>
+</figcaption></figure></center>
+
+<ul>
+<li>Anatomical atlases provide good <em>interpretability</em> but may not accurately fit brain function</li>
+<li>Best to derive brain areas from the data (can be done with functional and structural data)</li>
+</ul>
+</div>
+<div id="clustering-brain-data" class="slide section level1">
+<h1>Clustering Brain Data</h1>
+<ol style="list-style-type: decimal">
+<li>Preprocess the data</li>
+<li>Construct <em>affinity matrix</em> for each dataset
+<ul>
+<li><span class="math">\(N_{vox} \times N_{vox}\)</span> matrix where each entry corresponds to the similarity of the voxel's timeseries (fMRI), or connectivity pattern (fMRI or dMRI)</li>
+<li>Constrain connectivity to just neighboring voxels</li>
+</ul></li>
+<li>Cluster individual data
+<ul>
+<li>Several different clustering alogorithms can be used</li>
+</ul></li>
+<li>Combine clustering solution across datasets
+<ul>
+<li>Create affinity matrix for each clustering solution, where similarity is 1 if two voxels are in the same cluster, and 0 otherwise</li>
+<li>Average affinity matrices across datasets</li>
+</ul></li>
+<li>Perform group level clustering</li>
+<li>Determine optimal number of clusters
+<ul>
+<li>Calculate clustering solutions with different numbers of clusters</li>
+<li>Compare solutions to find the best</li>
+</ul></li>
+</ol>
+</div>
+<div id="finding-the-optimal-number-of-clusters" class="slide section level1">
+<h1>Finding the optimal number of clusters</h1>
+<ul>
+<li>Distortion index, silhouette, leave-one-out cross validation, representational accuracy</li>
+<li>No clear best solution, instead there is a continuum of solutions to choose from</li>
+</ul>
+<center><figure>
+<img src="imgs/ROI_compare.png">
+<figcaption>
+<small>Evaluation of different clustering solutions. Craddock et al., Human Brain Mapping, 2011</small>
+</figcaption></figure></center>
+
+</div>
+<div id="creating-edges" class="slide section level1">
+<h1>Creating Edges</h1>
+<ul>
+<li>Function interactions are typically measured using <strong>Pearson's correlation</strong>, although many other methods have been proposed <span class="math">\[\rho(v_i,v_j)=\frac{1}{T-1}\sum\limits_{t=0}^{T}\frac{(v_{i}[t]-\mu_{i})(v_{j}[t]-\mu_{j})}{\sigma_{i}\sigma_{j}}\]</span>
+<ul>
+<li><span class="math">\(v_i[t]\)</span> and <span class="math">\(v_j[t]\)</span> are the time courses for the <span class="math">\(i^{th}\)</span> and <span class="math">\(j^{th}\)</span> brain areas, respectively</li>
+<li><span class="math">\(T\)</span> is the number of samples in a time course</li>
+<li><span class="math">\(\mu_i\)</span> and <span class="math">\(\mu_j\)</span> are the means of the <span class="math">\(i^{th}\)</span> and <span class="math">\(j^{th}\)</span> brain areas</li>
+<li><span class="math">\(\sigma_i\)</span> and <span class="math">\(\sigma_j\)</span> are the standard deviations of the <span class="math">\(i^{th}\)</span> and <span class="math">\(j^{th}\)</span> brain areas</li>
+</ul></li>
+</ul>
+</div>
+<div id="other-methods" class="slide section level1">
+<h1>Other Methods</h1>
+<center><figure>
+<img src="imgs/net_methods.png" width=800>
+<figcaption>
+<small>Comparison of different methods for calculating functional relationships. Smith et al., NeuroImage, 2011</small>
+</figcaption></figure></center>
+
+</div>
+<div id="dti-connectomes-overview" class="slide section level1">
+<h1>DTI Connectomes Overview</h1>
+<center><figure>
+<img src="imgs/DTI_pipeline.png" width=800>
+<figcaption>
+<small>Zalesky et al., NeuroImage, 2010</small>
+</figcaption></figure></center>
+
+</div>
+<div id="diffusion-tensor-imaging" class="slide section level1">
+<h1>Diffusion Tensor Imaging</h1>
+<center>
+<img src="imgs/prisma_challenge_sag_half.png" width=800>
+</center>
+
+</div>
+<div id="diffusion-mri" class="slide section level1">
+<h1>Diffusion MRI</h1>
+<center>
+<img src="imgs/DTI_montage.png" width=800>
+</center>
+
+<ul>
+<li><a href="http://white.stanford.edu/~brian/papers/mri/2006-Wandell-NIPS-Tutorial.pdf">Brian Wandell PhD' Diffusion Tutorial from NIPS</a></li>
+</ul>
+</div>
+</body>
+</html>
